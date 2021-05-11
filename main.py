@@ -29,5 +29,22 @@ def filter_status(status_1,status_2,status_3,status_4,status_5,status_6):
     data = cursor.fetchall()
     return json.dumps(data, default=str)
 
+@app.route("/sort/<method>")
+def sort(method):
+    cursor = cnx.cursor()
+    if method == 'latest': #For sorting from latest complaint
+        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report ORDER BY created_at DESC")
+        data = cursor.fetchall()
+    elif method == 'oldest': #For sorting from oldest complaint
+        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report ORDER BY created_at ASC")
+        data = cursor.fetchall()
+    elif method == 'comment': #For sorting from the most commented complaint
+        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report ORDER BY (SELECT COUNT(*) FROM discussion_report WHERE id_report=id) DESC")
+        data = cursor.fetchall()
+    elif method == 'support': #For sorting from the most supported complaint
+        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report ORDER BY support DESC")
+        data = cursor.fetchall()
+    return json.dumps(data, default=str)
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True) # This is just for testing in the Cloud Shell
