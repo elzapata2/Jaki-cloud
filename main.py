@@ -11,6 +11,26 @@ cnx = mysql.connector.connect(user='root',
                                 database='jaki',
                                 auth_plugin='mysql_native_password')
 
+filter_sort_dict = {"id": '', "status": '', "title": '', "review_star": None, "longi": None, "lat": None, "created_at": '', "photo":''}
+filter_sort_list = []
+
+def listing (query_result):
+    filter_sort_list.clear() # Clearing list from other query
+    for x in query_result:
+        count=0
+        count_2 = 0
+        for y in x:
+            count += 1
+            for k,v in filter_sort_dict.items():
+                count_2 += 1
+                if count == count_2:
+                    filter_sort_dict[k] = y
+                    count_2 = 0
+                    break
+        dict_copy = filter_sort_dict.copy()
+        filter_sort_list.append(dict_copy)
+    return filter_sort_list
+
 @app.route('/')
 def purpose():
     return 'This link is for passing the data from database to the Mobile App'
@@ -20,14 +40,16 @@ def filter_date(start_date,end_date):
     cursor = cnx.cursor()
     cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE created_at BETWEEN '{} 00:00:00' and '{} 23:59:59'".format(str(start_date),str(end_date)))
     data = cursor.fetchall()
-    return json.dumps(data, default=str) # default=str, it's used for Decimal and Datetime datatype because JSON can't serialize these things
+    result = listing(data)
+    return json.dumps(result, default=str) # default=str, it's used for Decimal and Datetime datatype because JSON can't serialize these things
 
 @app.route("/filter-status/<status_1>/<status_2>/<status_3>/<status_4>/<status_5>/<status_6>") # If only 2 status get filtered, use random word at the rest of the parameter. Example: Selesai/Koordinasi/nope/nope/nope/nope
 def filter_status(status_1,status_2,status_3,status_4,status_5,status_6):
     cursor = cnx.cursor()
     cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE status='{}' OR status='{}' OR status='{}' OR status='{}' OR status='{}' OR status='{}'".format(status_1,status_2,status_3,status_4,status_5,status_6))
     data = cursor.fetchall()
-    return json.dumps(data, default=str)
+    result = listing(data)
+    return json.dumps(result, default=str)
 
 @app.route("/sort/<method>")
 def sort(method):
@@ -44,14 +66,16 @@ def sort(method):
     elif method == 'support': #For sorting from the most supported complaint
         cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report ORDER BY support DESC")
         data = cursor.fetchall()
-    return json.dumps(data, default=str)
+    result = listing(data)
+    return json.dumps(result, default=str)
 
 @app.route("/search/<keyword>")
 def search(keyword):
     cursor = cnx.cursor()
     cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE id REGEXP '{}\*' OR title REGEXP '{}\*' OR category REGEXP '{}\*'".format(keyword,keyword,keyword))
     data = cursor.fetchall()
-    return json.dumps(data, default=str)
+    result = listing(data)
+    return json.dumps(result, default=str)
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True) # This is just for testing in the Cloud Shell
