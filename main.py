@@ -11,5 +11,9 @@ cnx = mysql.connector.connect(user='root',
                                 database='jaki',
                                 auth_plugin='mysql_native_password')
 
+@app.route('/')
+def purpose():
+    return 'This link is for passing the data from database to the Mobile App'
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True) # This is just for testing in the Cloud Shell
