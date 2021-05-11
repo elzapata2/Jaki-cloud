@@ -22,5 +22,12 @@ def filter_date(start_date,end_date):
     data = cursor.fetchall()
     return json.dumps(data, default=str) # default=str, it's used for Decimal and Datetime datatype because JSON can't serialize these things
 
+@app.route("/filter-status/<status_1>/<status_2>/<status_3>/<status_4>/<status_5>/<status_6>") # If only 2 status get filtered, use random word at the rest of the parameter. Example: Selesai/Koordinasi/nope/nope/nope/nope
+def filter_status(status_1,status_2,status_3,status_4,status_5,status_6):
+    cursor = cnx.cursor()
+    cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE status='{}' OR status='{}' OR status='{}' OR status='{}' OR status='{}' OR status='{}'".format(status_1,status_2,status_3,status_4,status_5,status_6))
+    data = cursor.fetchall()
+    return json.dumps(data, default=str)
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True) # This is just for testing in the Cloud Shell
