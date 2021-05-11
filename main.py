@@ -46,5 +46,12 @@ def sort(method):
         data = cursor.fetchall()
     return json.dumps(data, default=str)
 
+@app.route("/search/<keyword>")
+def search(keyword):
+    cursor = cnx.cursor()
+    cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE id REGEXP '{}\*' OR title REGEXP '{}\*' OR category REGEXP '{}\*'".format(keyword,keyword,keyword))
+    data = cursor.fetchall()
+    return json.dumps(data, default=str)
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True) # This is just for testing in the Cloud Shell
