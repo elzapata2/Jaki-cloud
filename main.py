@@ -32,6 +32,12 @@ def listing (query_result):
         filter_sort_list.append(dict_copy)
     return filter_sort_list
 
+def get_data_loc():
+    cursor = cnx.cursor()
+    cursor.execute("SELECT lat,longi FROM report")
+    loc = cursor.fetchall()
+    return json.dumps(loc, default=str)
+
 @app.route('/')
 def purpose():
     return 'This link is for passing the data from database to the Mobile App'
