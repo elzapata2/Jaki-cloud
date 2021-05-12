@@ -84,5 +84,39 @@ def search(keyword):
     result = listing(data)
     return json.dumps(result, default=str)
 
+@app.route("/filter-loc/<my_longi>/<my_lat>/<km_choice>")
+def filter_loc(my_longi,my_lat,km_choice):
+    my_coor = (float(my_lat),float(my_longi))
+    data_coor = json.loads(get_data_loc()) #Get data Location from database
+    matched_loc = []
+    for x in data_coor:
+        count = 0
+        for y in x:
+            count += 1
+            if count == 1:
+                lat = float(y)
+            else:
+                longi = float(y)
+        comp_coor = (lat,longi)
+        km = geopy.distance.vincenty(my_coor, comp_coor).km # Measure distance (in km) between user's location and location in database
+        if km <= int(km_choice):
+            matched_loc.append(comp_coor) # The coordinates that matched with condition will be added to the list
+    query = 'SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE '
+    for x in matched_loc:
+        count = 0
+        for y in x:
+            count += 1
+            if count == 1:
+                lat = str(y)
+            else:
+                longi = str(y)
+        query = query + "(lat={} AND longi={}) OR ".format(lat,longi)
+    query = query + "id=\'wkwkwkkwwk\'" # Just ignore this, but don't delete it
+    cursor = cnx.cursor()
+    cursor.execute(query)
+    data = cursor.fetchall()
+    result = listing(data)
+    return json.dumps(result, default=str)
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True) # This is just for testing in the Cloud Shell
