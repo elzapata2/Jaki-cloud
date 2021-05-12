@@ -1,6 +1,7 @@
 import mysql.connector
 from flask import Flask
 import json
+import geopy.distance
 
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
