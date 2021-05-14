@@ -39,6 +39,34 @@ def get_data_loc():
     loc = cursor.fetchall()
     return json.dumps(loc, default=str)
 
+def get_query_loc_filter(my_lat,my_longi,km_choice,data_coor):
+    query = ''
+    my_coor = (my_lat,my_longi)
+    matched_loc = []
+    for x in data_coor:
+        count = 0
+        for y in x:
+            count += 1
+            if count == 1:
+                lat = float(y)
+            else:
+                longi = float(y)
+        comp_coor = (lat,longi)
+        km = geopy.distance.vincenty(my_coor, comp_coor).km # Measure distance (in km) between user's location and location in database
+        if km <= int(km_choice):
+            matched_loc.append(comp_coor) # The coordinates that matched with condition will be added to the list
+    for x in matched_loc:
+        count = 0
+        for y in x:
+            count += 1
+            if count == 1:
+                lat = str(y)
+            else:
+                longi = str(y)
+        query = query + "(lat={} AND longi={}) OR ".format(lat,longi)
+    query = query + "id=\'wkwkwkkwwk\'" # Just ignore this, but don't delete it
+    return query
+
 @app.route('/')
 def purpose():
     return 'This link is for passing the data from database to the Mobile App'
@@ -120,7 +148,7 @@ def filter_loc(my_longi,my_lat,km_choice):
     return json.dumps(result, default=str)
 
 @app.route("/filter")
-def filter():
+def filter():    
     query = "SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE "
     if 'start_date' in request.args:
         start_date = request.args['start_date']
@@ -148,19 +176,28 @@ def filter():
     if 'status_6' in request.args:
         status_6= request.args['status_6']
         query =  query + "OR status='{}' ".format(str(status_6))
-    if 'my_lat' and 'my_longi' and'km_choice' in request.args:
+    if 'status_1' in request.args:
+        if 'start_date' and 'end_date' in request.args:
+            query = query + ")"   
+    if 'my_lat' and 'my_longi' and 'km_choice' in request.args:
         my_lat = request.args['my_lat']
         my_longi = request.args['my_longi']
         km_choice = request.args['km_choice']
         data_coor = json.loads(get_data_loc())
-    if 'status_1' in request.args:
-        if 'start_date' and 'end_date' in request.args:
-            query = query + ")"
+        query_loc = get_query_loc_filter(my_lat,my_longi,km_choice,data_coor)
+        if 'status_1' in request.args:
+            if ('start_date' and 'end_date') in request.args:
+                query = query + ' AND ' + '(' + query_loc + ')'
+        elif ('start_date' and 'end_date') in request.args:
+            query = query + ' AND ' + '(' + query_loc + ')'
+        elif 'status_1' or ('start_date' and 'end_date') not in request.args:
+            query = query + query_loc                 
     cursor = cnx.cursor()
     cursor.execute(query)
     data = cursor.fetchall()
     result = listing(data)
     return json.dumps(result, default=str)
+    #return query
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True) # This is just for testing in the Cloud Shell
