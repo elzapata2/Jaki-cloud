@@ -89,6 +89,7 @@ def search(keyword):
 def filter_loc(my_longi,my_lat,km_choice):
     my_coor = (float(my_lat),float(my_longi))
     data_coor = json.loads(get_data_loc()) #Get data Location from database
+    query = 'SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE '
     matched_loc = []
     for x in data_coor:
         count = 0
@@ -102,7 +103,6 @@ def filter_loc(my_longi,my_lat,km_choice):
         km = geopy.distance.vincenty(my_coor, comp_coor).km # Measure distance (in km) between user's location and location in database
         if km <= int(km_choice):
             matched_loc.append(comp_coor) # The coordinates that matched with condition will be added to the list
-    query = 'SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE '
     for x in matched_loc:
         count = 0
         for y in x:
@@ -113,6 +113,49 @@ def filter_loc(my_longi,my_lat,km_choice):
                 longi = str(y)
         query = query + "(lat={} AND longi={}) OR ".format(lat,longi)
     query = query + "id=\'wkwkwkkwwk\'" # Just ignore this, but don't delete it
+    cursor = cnx.cursor()
+    cursor.execute(query)
+    data = cursor.fetchall()
+    result = listing(data)
+    return json.dumps(result, default=str)
+
+@app.route("/filter")
+def filter():
+    query = "SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE "
+    if 'start_date' in request.args:
+        start_date = request.args['start_date']
+        if 'end_date' in request.args:
+            end_date = request.args['end_date']
+            query = query + "created_at BETWEEN '{} 00:00:00' AND '{} 23:59:59' ".format(str(start_date),str(end_date))
+    if 'status_1' in request.args:
+        status_1= request.args['status_1']
+        if 'start_date' and 'end_date' in request.args:
+            query = query + "AND (status='{}' ".format(str(status_1))
+        else:
+            query = query + "status='{}' ".format(str(status_1))
+    if 'status_2' in request.args:
+        status_2= request.args['status_2']
+        query =  query + "OR status='{}' ".format(str(status_2))
+    if 'status_3' in request.args:
+        status_3= request.args['status_3']
+        query =  query + "OR status='{}' ".format(str(status_3))
+    if 'status_4' in request.args:
+        status_4= request.args['status_4']
+        query =  query + "OR status='{}' ".format(str(status_4))
+    if 'status_5' in request.args:
+        status_5= request.args['status_5']
+        query =  query + "OR status='{}' ".format(str(status_5))
+    if 'status_6' in request.args:
+        status_6= request.args['status_6']
+        query =  query + "OR status='{}' ".format(str(status_6))
+    if 'my_lat' and 'my_longi' and'km_choice' in request.args:
+        my_lat = request.args['my_lat']
+        my_longi = request.args['my_longi']
+        km_choice = request.args['km_choice']
+        data_coor = json.loads(get_data_loc())
+    if 'status_1' in request.args:
+        if 'start_date' and 'end_date' in request.args:
+            query = query + ")"
     cursor = cnx.cursor()
     cursor.execute(query)
     data = cursor.fetchall()
