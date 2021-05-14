@@ -1,5 +1,6 @@
 import mysql.connector
 from flask import Flask
+from flask import request
 import json
 import geopy.distance
 
