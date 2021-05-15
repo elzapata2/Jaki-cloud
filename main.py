@@ -235,5 +235,13 @@ def insert_data():
                   <input type="submit" value="Submit">
               </form>'''
 
+@app.route("/status/<id>")
+def status(id):
+    cursor = cnx.cursor()
+    cursor.execute("SELECT * FROM history_report WHERE id='{}'".format(id))
+    data = cursor.fetchall()
+    result = listing(data)
+    return json.dumps(result, default=str)
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True) # This is just for testing in the Cloud Shell
