@@ -199,5 +199,41 @@ def filter():
     return json.dumps(result, default=str)
     #return query
 
+@app.route("/insert-data",methods=['GET', 'POST'])
+def insert_data():
+    if request.method == 'POST':
+        id=request.form.get('id')
+        title=request.form.get('title')
+        cat=request.form.get('category')
+        longi=request.form.get('longitude')
+        lat=request.form.get('latitude')
+        rev_text=request.form.get('rev_text')
+        if rev_text == None:
+            rev_text = 'NULL'
+        rev_photo=request.form.get('rev_photo')
+        if rev_photo == None:
+            rev_photo = 'NULL'
+        rev_star=request.form.get('star')
+        if rev_star == None:
+            rev_star = 'NULL'
+        photo=request.form.get('photo')
+        cursor = cnx.cursor()
+        cursor.execute("INSERT INTO report VALUES ('{}','{}',NOW(),'{}',{},{},NULL,NULL,'{}','{}',{},'{}') ON DUPLICATE KEY UPDATE id='{}', title='{}', category='{}', longi={}, lat={}, review_text='{}', review_photo='{}', review_star={}, photo='{}'".format(id,title,cat,longi,lat,rev_text,rev_photo,rev_star,photo,id,title,cat,longi,lat,rev_text,rev_photo,rev_star,photo))
+        cnx.commit()
+        return 'Data sucsessfully inserted/updated'     
+    return '''
+              <form method="POST">
+                  <div><pre>id:                 <input type="text" name="id"></pre></div>
+                  <div><pre>title:              <input type="text" name="title"></pre></div>
+                  <div><pre>category:           <input type="text" name="category"></pre></div>
+                  <div><pre>longitude:          <input type="number" step="any" name="longitude"></pre></div>
+                  <div><pre>latitude:           <input type="number" step="any" name="latitude"></pre></div>
+                  <div><pre>review_text:        <input type="text" name="review_text"></pre></div>
+                  <div><pre>review_photo:       <input type="text" name="review_photo"></pre></div>
+                  <div><pre>review_star:        <input type="number" name="review_star"></pre></div>
+                  <div><pre>photo:              <input type="text" name="photo"></pre></div>
+                  <input type="submit" value="Submit">
+              </form>'''
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True) # This is just for testing in the Cloud Shell
