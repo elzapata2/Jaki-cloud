@@ -15,6 +15,12 @@ cnx = mysql.connector.connect(user='root',
 
 filter_sort_dict = {"id": '', "status": '', "title": '', "review_star": None, "longi": None, "lat": None, "created_at": '', "photo":''}
 get_status_dict = {"id_report": '', "status": '', "who": '', "text": '', "created_at": '', "photo":''}
+view_all = {"id": '', "title": '', "created_at": '', "category":'', "longi": None, "lat": None, "support":None, "status": '', "review_text":'', "review_photo":'', "review_star":None, "photo":''}
+status_view = {"status":'', "created_at":'', "who":''}
+comments = {"comments": None}
+total_comments={"total_comments":None}
+comment_view = {"username":'', "discuss":'', "created_at":''}
+current_status = {"current_status":None}
 filter_sort_list = []
 
 def listing (query_result,dict):
