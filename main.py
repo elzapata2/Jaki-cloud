@@ -14,6 +14,7 @@ cnx = mysql.connector.connect(user='root',
                                 auth_plugin='mysql_native_password')
 
 filter_sort_dict = {"id": '', "status": '', "title": '', "review_star": None, "longi": None, "lat": None, "created_at": '', "photo":''}
+get_status_dict = {"id_report": '', "status": '', "who": '', "text": '', "created_at": '', "photo":''}
 filter_sort_list = []
 
 def listing (query_result):
