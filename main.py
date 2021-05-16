@@ -21,6 +21,7 @@ comments = {"comments": None}
 total_comments={"total_comments":None}
 comment_view = {"username":'', "discuss":'', "created_at":''}
 current_status = {"current_status":None}
+disc_dict = {"username":'',"discuss":'',"created_at":''}
 filter_sort_list = []
 
 def listing (query_result,dict):
