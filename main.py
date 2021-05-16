@@ -306,7 +306,7 @@ def get_comment(id):
     cursor = cnx.cursor()
     cursor.execute("SELECT username,discuss,created_at FROM discussion_report WHERE id_report='{}'".format(id))
     data = cursor.fetchall()
-    result = listing(data,filter_sort_dict)
+    result = listing(data,disc_dict)
     return json.dumps(result, default=str)
 
 if __name__ == '__main__':
