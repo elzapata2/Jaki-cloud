@@ -200,6 +200,56 @@ def filter():
     return json.dumps(result, default=str)
     #return query
 
+@app.route("/detail/<id>")
+def detail(id):
+    cursor = cnx.cursor()
+    cursor.execute("SELECT * FROM report WHERE id='{}'".format(id))
+    data = cursor.fetchall()
+    result = listing(data,view_all)
+    dumping = json.dumps(result, default=str)
+    result_copy=result.copy()
+    cursor.execute("SELECT status,created_at,who FROM history_report WHERE id_report='{}' ORDER BY created_at DESC LIMIT 1".format(id))
+    data2 = cursor.fetchall()
+    result2 = listing(data2,status_view)
+    result2_copy=result2.copy()
+    current_status["current_status"]=result2_copy
+    current_status_copy=current_status.copy()
+    list_status=[]
+    list_status.append(current_status_copy)
+    list_status_copy=list_status.copy()
+    cursor.execute("SELECT username,discuss,created_at FROM discussion_report WHERE id_report='{}' ORDER BY created_at DESC LIMIT 3".format(id))
+    data3 = cursor.fetchall()
+    result3 = listing(data3,comment_view)
+    result3_copy=result3.copy()
+    comments["comments"]=result3_copy
+    comments_copy=comments.copy()
+    list_comment = []
+    list_comment.append(comments_copy)
+    list_comment_copy=list_comment.copy()
+    cursor.execute("SELECT COUNT(*) FROM discussion_report WHERE id_report='{}'".format(id))
+    data4 = cursor.fetchall()
+    result4 = listing(data4,total_comments)
+    result4_copy=result4.copy()
+    #print(result_copy)
+    #print(result2_copy)
+    #print(list_status_copy)
+    #print(result3_copy)
+    #print(list_comment_copy)
+    #print(result4_copy)
+    for x in result_copy:
+        for a in list_status_copy:
+            z = {**x,**a}
+    for x in result_copy:
+        for a in list_comment_copy:
+            c = {**z,**a}
+    for x in result_copy:
+        for a in result4_copy:
+            d = {**c,**a}
+    complete_list = []
+    complete_list.append(d)
+    #print (complete_list)
+    return json.dumps(complete_list, default=str)
+
 @app.route("/insert-data",methods=['GET', 'POST'])
 def insert_data():
     if request.method == 'POST':
