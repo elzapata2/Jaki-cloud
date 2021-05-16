@@ -239,7 +239,7 @@ def insert_data():
 @app.route("/status/<id>")
 def status(id):
     cursor = cnx.cursor()
-    cursor.execute("SELECT * FROM history_report WHERE id='{}'".format(id))
+    cursor.execute("SELECT * FROM history_report WHERE id_report='{}'".format(id))
     data = cursor.fetchall()
     result = listing(data,get_status_dict)
     return json.dumps(result, default=str)
