@@ -300,5 +300,13 @@ def status(id):
     result = listing(data,get_status_dict)
     return json.dumps(result, default=str)
 
+@app.route("/get-comment/<id>")
+def get_comment(id):
+    cursor = cnx.cursor()
+    cursor.execute("SELECT username,discuss,created_at FROM discussion_report WHERE id_report='{}'".format(id))
+    data = cursor.fetchall()
+    result = listing(data,filter_sort_dict)
+    return json.dumps(result, default=str)
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True) # This is just for testing in the Cloud Shell
