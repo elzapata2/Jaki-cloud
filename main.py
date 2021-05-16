@@ -17,20 +17,20 @@ filter_sort_dict = {"id": '', "status": '', "title": '', "review_star": None, "l
 get_status_dict = {"id_report": '', "status": '', "who": '', "text": '', "created_at": '', "photo":''}
 filter_sort_list = []
 
-def listing (query_result):
+def listing (query_result,dict):
     filter_sort_list.clear() # Clearing list from other query
     for x in query_result:
         count=0
         count_2 = 0
         for y in x:
             count += 1
-            for k,v in filter_sort_dict.items():
+            for k,v in dict.items():
                 count_2 += 1
                 if count == count_2:
-                    filter_sort_dict[k] = y
+                    dict[k] = y
                     count_2 = 0
                     break
-        dict_copy = filter_sort_dict.copy()
+        dict_copy = dict.copy()
         filter_sort_list.append(dict_copy)
     return filter_sort_list
 
