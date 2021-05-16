@@ -77,7 +77,7 @@ def filter_date(start_date,end_date):
     cursor = cnx.cursor()
     cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE created_at BETWEEN '{} 00:00:00' and '{} 23:59:59'".format(str(start_date),str(end_date)))
     data = cursor.fetchall()
-    result = listing(data)
+    result = listing(data,filter_sort_dict)
     return json.dumps(result, default=str) # default=str, it's used for Decimal and Datetime datatype because JSON can't serialize these things
 
 @app.route("/filter-status/<status_1>/<status_2>/<status_3>/<status_4>/<status_5>/<status_6>") # If only 2 status get filtered, use random word at the rest of the parameter. Example: Selesai/Koordinasi/nope/nope/nope/nope
@@ -85,7 +85,7 @@ def filter_status(status_1,status_2,status_3,status_4,status_5,status_6):
     cursor = cnx.cursor()
     cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE status='{}' OR status='{}' OR status='{}' OR status='{}' OR status='{}' OR status='{}'".format(status_1,status_2,status_3,status_4,status_5,status_6))
     data = cursor.fetchall()
-    result = listing(data)
+    result = listing(data,filter_sort_dict)
     return json.dumps(result, default=str)
 
 @app.route("/sort/<method>")
@@ -103,7 +103,7 @@ def sort(method):
     elif method == 'support': #For sorting from the most supported complaint
         cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report ORDER BY support DESC")
         data = cursor.fetchall()
-    result = listing(data)
+    result = listing(data,filter_sort_dict)
     return json.dumps(result, default=str)
 
 @app.route("/search/<keyword>")
@@ -111,7 +111,7 @@ def search(keyword):
     cursor = cnx.cursor()
     cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE id REGEXP '{}\*' OR title REGEXP '{}\*' OR category REGEXP '{}\*'".format(keyword,keyword,keyword))
     data = cursor.fetchall()
-    result = listing(data)
+    result = listing(data,filter_sort_dict)
     return json.dumps(result, default=str)
 
 @app.route("/filter-loc/<my_longi>/<my_lat>/<km_choice>")
@@ -145,7 +145,7 @@ def filter_loc(my_longi,my_lat,km_choice):
     cursor = cnx.cursor()
     cursor.execute(query)
     data = cursor.fetchall()
-    result = listing(data)
+    result = listing(data,filter_sort_dict)
     return json.dumps(result, default=str)
 
 @app.route("/filter")
@@ -196,7 +196,7 @@ def filter():
     cursor = cnx.cursor()
     cursor.execute(query)
     data = cursor.fetchall()
-    result = listing(data)
+    result = listing(data,filter_sort_dict)
     return json.dumps(result, default=str)
     #return query
 
@@ -241,7 +241,7 @@ def status(id):
     cursor = cnx.cursor()
     cursor.execute("SELECT * FROM history_report WHERE id='{}'".format(id))
     data = cursor.fetchall()
-    result = listing(data)
+    result = listing(data,get_status_dict)
     return json.dumps(result, default=str)
 
 if __name__ == '__main__':
