@@ -327,5 +327,27 @@ def insert_comment():
                   <input type="submit" value="Submit">
               </form>'''
 
+@app.route("/add-dec-support",methods=['GET', 'POST'])
+def add_dec_support():
+    if request.method == 'POST':
+        if request.form["action"] == 'Add':
+            id=request.form.get('id')
+            cursor = cnx.cursor()
+            cursor.execute("UPDATE report SET support=IFNULL(support + 1,1) WHERE id='{}'".format(id))
+            cnx.commit()
+            return 'Support successfully added'
+        elif request.form["action"] == 'Decrease':
+            id=request.form.get('id')
+            cursor = cnx.cursor()
+            cursor.execute("UPDATE report SET support=IF(support=1,support=NULL,support - 1) WHERE id='{}'".format(id))
+            cnx.commit()
+            return 'Support successfully decreased'     
+    return '''
+              <form method="POST">
+                  <div><pre>id      :               <input type="text" name="id"></pre></div>
+                  <div><input type="submit" name="action" value="Add"></div> <br>
+                  <div><input type="submit" name="action" value="Decrease"></div>
+              </form>'''
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True) # This is just for testing in the Cloud Shell
