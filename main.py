@@ -213,7 +213,6 @@ def detail(id):
     cursor.execute("SELECT * FROM report WHERE id='{}'".format(id))
     data = cursor.fetchall()
     result = listing(data,view_all)
-    dumping = json.dumps(result, default=str)
     result_copy=result.copy()
     cursor.execute("SELECT status,created_at,who FROM history_report WHERE id_report='{}' ORDER BY created_at DESC LIMIT 1".format(id))
     data2 = cursor.fetchall()
