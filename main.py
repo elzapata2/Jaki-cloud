@@ -309,5 +309,23 @@ def get_comment(id):
     result = listing(data,disc_dict)
     return json.dumps(result, default=str)
 
+@app.route("/insert-comment",methods=['GET', 'POST'])
+def insert_comment():
+    if request.method == 'POST':
+        id=request.form.get('id')
+        user=request.form.get('user')
+        comment=request.form.get('comment')
+        cursor = cnx.cursor()
+        cursor.execute("INSERT INTO discussion_report VALUES ((SELECT id FROM report WHERE id='{}'),'{}','{}',NOW())".format(id,user,comment))
+        cnx.commit()
+        return 'Comment sucsessfully inserted'     
+    return '''
+              <form method="POST">
+                  <div><pre>id      :               <input type="text" name="id"></pre></div>
+                  <div><pre>username:               <input type="text" name="user"></pre></div>
+                  <div><pre>comment :               <input type="text" name="comment"></pre></div>
+                  <input type="submit" value="Submit">
+              </form>'''
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True) # This is just for testing in the Cloud Shell
