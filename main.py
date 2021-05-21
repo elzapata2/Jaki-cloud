@@ -3,6 +3,7 @@ from flask import Flask
 from flask import request
 import json
 import geopy.distance
+from google.cloud import storage
 
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
