@@ -261,35 +261,56 @@ def detail(id):
 def insert_data():
     if request.method == 'POST':
         id=request.form.get('id')
+        if id == None :
+            return 'Please insert ID'
         title=request.form.get('title')
+        if title == None:
+            return 'please insert title'
         cat=request.form.get('category')
+        if cat == None:
+            return 'Please insert category'
         longi=request.form.get('longitude')
+        if longi == None :
+            return 'Please insert longitude'
         lat=request.form.get('latitude')
-        rev_text=request.form.get('rev_text')
+        if lat == None :
+            return 'Please insert Latitude'
+        photo=request.files.get('photo')
+        if photo == None:
+            return 'Please upload photo'
+        gcs = storage.Client()
+        bucket = gcs.get_bucket('image-jaki')
+        blob = bucket.blob('image/{}'.format(photo.filename))
+        blob.upload_from_string(photo.read(),content_type=photo.content_type)
+        photo_url = blob.public_url
+        rev_text=request.form.get('review_text')
         if rev_text == None:
             rev_text = 'NULL'
-        rev_photo=request.form.get('rev_photo')
-        if rev_photo == None:
-            rev_photo = 'NULL'
-        rev_star=request.form.get('star')
+        rev_photo=request.files.get('review_photo')
+        if rev_photo == None :
+            rev_photo_url = 'NULL'
+        else:
+            blob_rev = bucket.blob('rev_image/{}'.format(rev_photo.filename))
+            blob_rev.upload_from_string(rev_photo.read(),content_type=rev_photo.content_type)
+            rev_photo_url = blob_rev.public_url
+        rev_star=request.form.get('review_star')
         if rev_star == None:
-            rev_star = 'NULL'
-        photo=request.form.get('photo')
+            rev_star = 'NULL' 
         cursor = cnx.cursor()
-        cursor.execute("INSERT INTO report VALUES ('{}','{}',NOW(),'{}',{},{},NULL,NULL,'{}','{}',{},'{}') ON DUPLICATE KEY UPDATE id='{}', title='{}', category='{}', longi={}, lat={}, review_text='{}', review_photo='{}', review_star={}, photo='{}'".format(id,title,cat,longi,lat,rev_text,rev_photo,rev_star,photo,id,title,cat,longi,lat,rev_text,rev_photo,rev_star,photo))
+        cursor.execute("INSERT INTO report VALUES ('{}','{}',NOW(),'{}',{},{},NULL,NULL,'{}','{}',{},'{}') ON DUPLICATE KEY UPDATE id='{}', title='{}', category='{}', longi={}, lat={}, review_text='{}', review_photo='{}', review_star={}, photo='{}'".format(id,title,cat,longi,lat,rev_text,rev_photo_url,rev_star,photo_url,id,title,cat,longi,lat,rev_text,rev_photo_url,rev_star,photo_url))
         cnx.commit()
-        return 'Data sucsessfully inserted/updated'     
+        return 'Data successfully inserted/updated'     
     return '''
-              <form method="POST">
+              <form method="POST" enctype="multipart/form-data">
                   <div><pre>id:                 <input type="text" name="id"></pre></div>
                   <div><pre>title:              <input type="text" name="title"></pre></div>
                   <div><pre>category:           <input type="text" name="category"></pre></div>
                   <div><pre>longitude:          <input type="number" step="any" name="longitude"></pre></div>
                   <div><pre>latitude:           <input type="number" step="any" name="latitude"></pre></div>
                   <div><pre>review_text:        <input type="text" name="review_text"></pre></div>
-                  <div><pre>review_photo:       <input type="text" name="review_photo"></pre></div>
+                  <div><pre>review_photo:       <input type="file" name="review_photo"></pre></div>
                   <div><pre>review_star:        <input type="number" name="review_star"></pre></div>
-                  <div><pre>photo:              <input type="text" name="photo"></pre></div>
+                  <div><pre>photo:              <input type="file" name="photo"></pre></div>
                   <input type="submit" value="Submit">
               </form>'''
 
