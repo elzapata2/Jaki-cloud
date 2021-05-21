@@ -169,7 +169,7 @@ def filter():
         if 'start_date' and 'end_date' in request.args:
             query = query + "AND (status='{}' ".format(str(status_1))
         else:
-            query = query + "status='{}' ".format(str(status_1))
+            query = query + "(status='{}' ".format(str(status_1))
     if 'status_2' in request.args:
         status_2= request.args['status_2']
         query =  query + "OR status='{}' ".format(str(status_2))
@@ -186,8 +186,7 @@ def filter():
         status_6= request.args['status_6']
         query =  query + "OR status='{}' ".format(str(status_6))
     if 'status_1' in request.args:
-        if 'start_date' and 'end_date' in request.args:
-            query = query + ")"   
+        query = query + ")"   
     if 'my_lat' and 'my_longi' and 'km_choice' in request.args:
         my_lat = request.args['my_lat']
         my_longi = request.args['my_longi']
@@ -197,10 +196,12 @@ def filter():
         if 'status_1' in request.args:
             if ('start_date' and 'end_date') in request.args:
                 query = query + ' AND ' + '(' + query_loc + ')'
+            else:
+                query = query + ' AND ' + '(' + query_loc + ')'
         elif ('start_date' and 'end_date') in request.args:
             query = query + ' AND ' + '(' + query_loc + ')'
         elif 'status_1' or ('start_date' and 'end_date') not in request.args:
-            query = query + query_loc                 
+            query = query + query_loc         
     cursor = cnx.cursor()
     cursor.execute(query)
     data = cursor.fetchall()
