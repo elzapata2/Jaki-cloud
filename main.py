@@ -370,5 +370,37 @@ def add_dec_support():
                   <div><input type="submit" name="action" value="Decrease"></div>
               </form>'''
 
+@app.route("/insert-status",methods=['GET', 'POST'])
+def insert_status():
+    if request.method == 'POST':
+        id=request.form.get('id')
+        status=request.form.get('status')
+        who=request.form.get('who')
+        text=request.form.get('text')
+        photo=request.files.get('photo')
+        if photo == None:
+            photo_url='NULL'
+        else:
+            gcs = storage.Client()
+            bucket = gcs.get_bucket('image-jaki')
+            blob = bucket.blob('status_image/{}'.format(photo.filename))
+            blob.upload_from_string(photo.read(),content_type=photo.content_type)
+            photo_url = blob.public_url    
+        cursor = cnx.cursor()
+        cursor.execute("INSERT INTO history_report VALUES ((SELECT id FROM report WHERE id='{}'),'{}','{}','{}',NOW(),'{}')".format(id,status,who,text,photo_url))
+        cnx.commit()
+        cursor.execute("UPDATE report SET status='{}' WHERE id='{}'".format(status,id))
+        cnx.commit()
+        return 'Status successfully inserted'     
+    return '''
+              <form method="POST" enctype="multipart/form-data">
+                  <div><pre>id      :               <input type="text" name="id"></pre></div>
+                  <div><pre>status  :               <input type="text" name="status"></pre></div>
+                  <div><pre>who     :               <input type="text" name="who"></pre></div>
+                  <div><pre>text    :               <input type="text" name="text"></pre></div>
+                  <div><pre>photo   :               <input type="file" name="photo"></pre></div>
+                  <input type="submit" value="Submit">
+              </form>'''
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True) # This is just for testing in the Cloud Shell
