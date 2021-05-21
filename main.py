@@ -76,9 +76,43 @@ def get_query_loc_filter(my_lat,my_longi,km_choice,data_coor):
     query = query + "id=\'wkwkwkkwwk\'" # Just ignore this, but don't delete it
     return query
 
-@app.route('/')
-def purpose():
-    return 'This link is for passing the data from database to the Mobile App'
+@app.route("/")
+def home():
+        return '''
+                <p>For filtering data you can use <url>/filter. For Example:\n<p>
+                <li><a href="/filter?start_date=2021-05-09&end_date=2021-05-13">https://deft-haven-312422.et.r.appspot.com/filter?start_date=2021-05-09&end_date=2021-05-13</a></li>
+                <li><a href="/filter?status_1=Koordinasi&status_2=Selesai&my_lat=-6.23219700&my_longi=106.84370700&km_choice=4">https://deft-haven-312422.et.r.appspot.com/filter?status_1=Koordinasi&status_2=Selesai&my_lat=-6.23219700&my_longi=106.84370700&km_choice=4\n</a></li>
+                <p>The parameters:\n</p>
+                <li>start_date & end_date (use both of them if you want to filter date)</li>
+                <li>status_1, status_2, ... , status_6</li>
+                <li>my_lat, my_longi, km_choice (use all of them if you want to filter location)</li><br><br>
+                <p> For sorting use <url>/sort/(method). For example:\n<p>
+                <li><a href="/sort/latest">https://deft-haven-312422.et.r.appspot.com/sort/latest</a></li>
+                <p>The (method)s:\n</p>
+                <li>latest (sorting from latest complaint)</li>
+                <li>oldest (sorting from oldest complaint)</li>
+                <li>comment (sorting from the most commented complaint)</li>
+                <li>support (sorting from the most supported complaint)</li><br><br>
+                <p> For search filtering use <url>/search/(keyword). For example:\n<p>
+                <li><a href="/search/pohon">https://deft-haven-312422.et.r.appspot.com/search/pohon</a></li>
+                <p>For now you can search by ID, title, and category</p><br><br>
+                <p>For Viewing the complaint use /detail/(id). For Example:\n</p>
+                <li><a href="/detail/TS0000000001">https://deft-haven-312422.et.r.appspot.com/detail/TS0000000001</a></li><br><br>
+                <p>For inserting and updating data complaint use <url>/insert-data.\n</p>
+                <li><a href="/insert-data">https://deft-haven-312422.et.r.appspot.com/insert-data</a></li>
+                <p>For inserting/updating support and status, there will be anouter route.\n</p><br><br>
+                <p>For getting all status report from a complaint use <url>/status/(id) For example:.\n</p>
+                <li><a href="/status/TS0000000002">https://deft-haven-312422.et.r.appspot.com/status/TS0000000002</a></li><br><br>
+                <p>For inserting support use <url>/insert-status.\n</p>
+                <li><a href="/insert-status">https://deft-haven-312422.et.r.appspot.com/insert-status</a></li>
+                <p>This will insert into history_report table and update status in report table.<p><br><br>
+                <p>For adding or decreasing support use <url>/add-dec-support.\n</p>
+                <li><a href="/add-dec-support">https://deft-haven-312422.et.r.appspot.com/add-dec-support</a></li><br><br>
+                <p>For getting every comments in a complaint use <url>/get-comment/(id). For example:\n</p>
+                <li><a href="/get-comment/TS0000000002">https://deft-haven-312422.et.r.appspot.com/get-comment/TS0000000002</a></li><br><br>
+                <p>For inserting comment use <url>/insert-comment/.\n</p>
+                <li><a href="/insert-comment">https://deft-haven-312422.et.r.appspot.com/insert-comment</a></li><br><br>
+              '''
 
 @app.route("/filter-date/<start_date>/<end_date>") # Route for Date Filtering
 def filter_date(start_date,end_date):
