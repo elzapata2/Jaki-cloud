@@ -295,9 +295,6 @@ def detail(id):
 @app.route("/insert-data",methods=['GET', 'POST'])
 def insert_data():
     if request.method == 'POST':
-        id=request.form.get('id')
-        if id == None :
-            return 'Please insert ID'
         title=request.form.get('title')
         if title == None:
             return 'please insert title'
@@ -329,15 +326,14 @@ def insert_data():
             blob_rev.upload_from_string(rev_photo.read(),content_type=rev_photo.content_type)
             rev_photo_url = blob_rev.public_url
         rev_star=request.form.get('review_star')
-        if rev_star == None:
+        if rev_star == '':
             rev_star = 'NULL' 
         cursor = cnx.cursor()
-        cursor.execute("INSERT INTO report VALUES ('{}','{}',NOW(),'{}',{},{},NULL,NULL,'{}','{}',{},'{}') ON DUPLICATE KEY UPDATE id='{}', title='{}', category='{}', longi={}, lat={}, review_text='{}', review_photo='{}', review_star={}, photo='{}'".format(id,title,cat,longi,lat,rev_text,rev_photo_url,rev_star,photo_url,id,title,cat,longi,lat,rev_text,rev_photo_url,rev_star,photo_url))
+        cursor.execute("INSERT INTO report (title,created_at,category,longi,lat,review_text,review_photo,review_star,photo) VALUES ('{}',NOW(),'{}',{},{},'{}','{}',{},'{}')".format(title,cat,longi,lat,rev_text,rev_photo_url,str(rev_star),photo_url))
         cnx.commit()
         return 'Data successfully inserted/updated'     
     return '''
               <form method="POST" enctype="multipart/form-data">
-                  <div><pre>id:                 <input type="text" name="id"></pre></div>
                   <div><pre>title:              <input type="text" name="title"></pre></div>
                   <div><pre>category:           <input type="text" name="category"></pre></div>
                   <div><pre>longitude:          <input type="number" step="any" name="longitude"></pre></div>
