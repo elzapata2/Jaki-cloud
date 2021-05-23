@@ -368,7 +368,7 @@ def insert_comment():
         user=request.form.get('user')
         comment=request.form.get('comment')
         cursor = cnx.cursor()
-        cursor.execute("INSERT INTO discussion_report VALUES ((SELECT id FROM report WHERE id='{}'),'{}','{}',NOW())".format(id,user,comment))
+        cursor.execute("INSERT INTO discussion_report VALUES ((SELECT id FROM report WHERE id={}),'{}','{}',NOW())".format(id,user,comment))
         cnx.commit()
         return 'Comment sucsessfully inserted'     
     return '''
@@ -418,7 +418,7 @@ def insert_status():
             blob.upload_from_string(photo.read(),content_type=photo.content_type)
             photo_url = blob.public_url    
         cursor = cnx.cursor()
-        cursor.execute("INSERT INTO history_report VALUES ((SELECT id FROM report WHERE id='{}'),'{}','{}','{}',NOW(),'{}')".format(id,status,who,text,photo_url))
+        cursor.execute("INSERT INTO history_report VALUES ((SELECT id FROM report WHERE id={}),'{}','{}','{}',NOW(),'{}')".format(id,status,who,text,photo_url))
         cnx.commit()
         cursor.execute("UPDATE report SET status='{}' WHERE id='{}'".format(status,id))
         cnx.commit()
