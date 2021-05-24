@@ -308,39 +308,37 @@ def insert_data():
         if lat == None :
             return 'Please insert Latitude'
         photo=request.files.get('photo')
-        if photo == None:
+        if photo.filename == '':
             return 'Please upload photo'
         gcs = storage.Client()
         bucket = gcs.get_bucket('image-jaki')
         blob = bucket.blob('image/{}'.format(photo.filename))
         blob.upload_from_string(photo.read(),content_type=photo.content_type)
         photo_url = blob.public_url
-        rev_text=request.form.get('review_text')
-        if rev_text == None:
-            rev_text = 'NULL'
-        rev_photo=request.files.get('review_photo')
-        if rev_photo == None :
-            rev_photo_url = 'NULL'
-        else:
-            blob_rev = bucket.blob('rev_image/{}'.format(rev_photo.filename))
-            blob_rev.upload_from_string(rev_photo.read(),content_type=rev_photo.content_type)
-            rev_photo_url = blob_rev.public_url
-        rev_star=request.form.get('review_star')
-        if rev_star == '':
-            rev_star = 'NULL' 
+        #rev_text=request.form.get('review_text')
+        #if rev_text == '':
+            #rev_text = 'NULL'
+        #rev_photo=request.files.get('review_photo')
+        #if rev_photo == None :
+            #rev_photo_url = 'NULL'
+        #else:
+            #blob_rev = bucket.blob('rev_image/{}'.format(rev_photo.filename))
+            #blob_rev.upload_from_string(rev_photo.read(),content_type=rev_photo.content_type)
+            #rev_photo_url = blob_rev.public_url
+        #rev_star=request.form.get('review_star')
+        #if rev_star == '':
+            #rev_star = 'NULL' 
         cursor = cnx.cursor()
-        cursor.execute("INSERT INTO report (title,created_at,category,longi,lat,review_text,review_photo,review_star,photo) VALUES ('{}',NOW(),'{}',{},{},'{}','{}',{},'{}')".format(title,cat,longi,lat,rev_text,rev_photo_url,str(rev_star),photo_url))
+        cursor.execute("INSERT INTO report (title,created_at,category,longi,lat,photo) VALUES ('{}',NOW(),'{}',{},{},'{}')".format(title,cat,longi,lat,photo_url))
         cnx.commit()
-        return 'Data successfully inserted/updated'     
+        return 'Data successfully inserted/updated'
+        #return rev_photo_url    
     return '''
               <form method="POST" enctype="multipart/form-data">
                   <div><pre>title:              <input type="text" name="title"></pre></div>
                   <div><pre>category:           <input type="text" name="category"></pre></div>
                   <div><pre>longitude:          <input type="number" step="any" name="longitude"></pre></div>
                   <div><pre>latitude:           <input type="number" step="any" name="latitude"></pre></div>
-                  <div><pre>review_text:        <input type="text" name="review_text"></pre></div>
-                  <div><pre>review_photo:       <input type="file" name="review_photo"></pre></div>
-                  <div><pre>review_star:        <input type="number" name="review_star"></pre></div>
                   <div><pre>photo:              <input type="file" name="photo"></pre></div>
                   <input type="submit" value="Submit">
               </form>'''
@@ -409,7 +407,7 @@ def insert_status():
         who=request.form.get('who')
         text=request.form.get('text')
         photo=request.files.get('photo')
-        if photo == None:
+        if photo.filename == '':
             photo_url='NULL'
         else:
             gcs = storage.Client()
@@ -422,7 +420,9 @@ def insert_status():
         cnx.commit()
         cursor.execute("UPDATE report SET status='{}' WHERE id='{}'".format(status,id))
         cnx.commit()
-        return 'Status successfully inserted'     
+        return 'Status successfully inserted'
+        #print (photo_url)
+        #return photo_url     
     return '''
               <form method="POST" enctype="multipart/form-data">
                   <div><pre>id      :               <input type="text" name="id"></pre></div>
