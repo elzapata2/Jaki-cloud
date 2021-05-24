@@ -380,7 +380,7 @@ def insert_comment():
     return '''
               <form method="POST">
                   <div><pre>id      :               <input type="text" name="id"></pre></div>
-                  <div><pre>username:               <input type="text" name="user"></pre></div>
+                  <div><pre>user    :               <input type="text" name="user"></pre></div>
                   <div><pre>comment :               <input type="text" name="comment"></pre></div>
                   <input type="submit" value="Submit">
               </form>'''
