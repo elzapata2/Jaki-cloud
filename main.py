@@ -296,16 +296,16 @@ def detail(id):
 def insert_data():
     if request.method == 'POST':
         title=request.form.get('title')
-        if title == None:
+        if title == '':
             return 'please insert title'
         cat=request.form.get('category')
-        if cat == None:
+        if cat == '':
             return 'Please insert category'
         longi=request.form.get('longitude')
-        if longi == None :
+        if longi == '' :
             return 'Please insert longitude'
         lat=request.form.get('latitude')
-        if lat == None :
+        if lat == '' :
             return 'Please insert Latitude'
         photo=request.files.get('photo')
         if photo.filename == '':
