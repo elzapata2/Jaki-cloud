@@ -331,7 +331,10 @@ def insert_data():
         cursor = cnx.cursor()
         cursor.execute("INSERT INTO report (title,created_at,category,longi,lat,photo) VALUES ('{}',NOW(),'{}',{},{},'{}')".format(title,cat,longi,lat,photo_url))
         cnx.commit()
-        return 'Data successfully inserted/updated'
+        cursor.execute("SELECT * FROM report ORDER BY created_at DESC LIMIT 1")
+        data = cursor.fetchall()
+        result = listing(data,view_all)
+        return json.dumps(result, default=str)
         #return rev_photo_url    
     return '''
               <form method="POST" enctype="multipart/form-data">
