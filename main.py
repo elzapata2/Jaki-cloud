@@ -373,7 +373,10 @@ def insert_comment():
         cursor = cnx.cursor()
         cursor.execute("INSERT INTO discussion_report VALUES ((SELECT id FROM report WHERE id={}),'{}','{}',NOW())".format(id,user,comment))
         cnx.commit()
-        return 'Comment sucsessfully inserted'     
+        cursor.execute("SELECT * FROM discussion_report ORDER BY created_at DESC LIMIT 1")
+        data = cursor.fetchall()
+        result = listing(data,inserted_comment)
+        return json.dumps(result, default=str)    
     return '''
               <form method="POST">
                   <div><pre>id      :               <input type="text" name="id"></pre></div>
@@ -425,7 +428,10 @@ def insert_status():
         cnx.commit()
         cursor.execute("UPDATE report SET status='{}' WHERE id='{}'".format(status,id))
         cnx.commit()
-        return 'Status successfully inserted'
+        cursor.execute("SELECT * FROM history_report ORDER BY created_at DESC LIMIT 1")
+        data = cursor.fetchall()
+        result = listing(data,inserted_status)
+        return json.dumps(result, default=str)  
         #print (photo_url)
         #return photo_url     
     return '''
