@@ -6,6 +6,11 @@ import geopy.distance
 from google.cloud import storage
 import os
 import tensorflow as tf
+from gensim.models import Word2Vec
+import numpy as np
+from tensorflow import keras
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="cloudstorage.json"
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
@@ -453,15 +458,62 @@ def predict():
     bucket = gcs.get_bucket('trained_model_jaki')
     blob = bucket.get_blob('JakiChan.tflite')
     model = blob.download_to_filename(blob.name)
-    print(blob)
     interpreter = tf.lite.Interpreter(model_path="JakiChan.tflite")
     interpreter.allocate_tensors()
     input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
-    interpreter.set_tensor(input_details[0]['index'], 'Banjir sudah 2 meter')
+    output_details = interpreter.get_output_details()    
+    sentence = "Sampah banyak ini mohon disingkirkan"
+    tokenizer = Tokenizer(num_words=3000, oov_token="<OOV>")
+    tokenizer.fit_on_texts(sentence)
+    word_index = tokenizer.word_index
+    print(word_index)
+    #list_sentence = []
+    #list_sentence.append(sentence)
+    tw = tokenizer.texts_to_sequences([sentence])
+    print(tw)
+    tw1 = pad_sequences(tw,maxlen=100)    
+    print(tw1)
+    #sentiment_label[1][prediction]
+    '''sentence_split = sentence.split()
+    print(sentence_split)
+    list_sentence = []
+    list_sentence.append(sentence_split)
+    vec = Word2Vec(list_sentence, min_count=1)
+    list_vec = []
+    list_vec.append(vec["Banjir"])
+    print(list_vec)
+    words = list(vec.wv.vocab)
+    print(vec[words])
+    list_input=[]
+    list_input.append(vec[words])
+    print(list_input)'''
+    #input_shape = input_details[0]['shape']
+    #input_data = np.fromstring(sentence, dtype=np.float32, sep=' ')
+    list_tw = []
+    for x in tw1:
+        for y in x:
+            list_tw.append(float(y))
+    print(list_tw)
+    input_data = np.array(list_tw, dtype=np.float32)
+    interpreter.set_tensor(input_details[0]['index'], [input_data])
+    interpreter.invoke()
     output_data = interpreter.get_tensor(output_details[0]['index'])
-    print(input_details)
     print(output_data)
+    
+    #print(input_details)
+    '''input_shape = input_details[0]['shape']
+    input_data = np.array(list_input, dtype=np.float32)
+    interpreter.set_tensor(input_details[0]['index'], input_data)
+
+    interpreter.invoke()
+
+    # The function `get_tensor()` returns a copy of the tensor data.
+    # Use `tensor()` in order to get a pointer to the tensor.
+    output_data = interpreter.get_tensor(output_details[0]['index'])
+    print(output_data)
+    print(input_details)'''
+    #print(input_details)
+    print(output_details)
     return 'success?'
 
 if __name__ == '__main__':
