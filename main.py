@@ -4,7 +4,10 @@ from flask import request
 import json
 import geopy.distance
 from google.cloud import storage
+import os
+import tensorflow as tf
 
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="cloudstorage.json"
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
 app = Flask(__name__)
@@ -443,6 +446,23 @@ def insert_status():
                   <div><pre>photo   :               <input type="file" name="photo"></pre></div>
                   <input type="submit" value="Submit">
               </form>'''
+
+@app.route('/predict', methods=['GET'])
+def predict():
+    gcs = storage.Client()
+    bucket = gcs.get_bucket('trained_model_jaki')
+    blob = bucket.get_blob('JakiChan.tflite')
+    model = blob.download_to_filename(blob.name)
+    print(blob)
+    interpreter = tf.lite.Interpreter(model_path="JakiChan.tflite")
+    interpreter.allocate_tensors()
+    input_details = interpreter.get_input_details()
+    output_details = interpreter.get_output_details()
+    interpreter.set_tensor(input_details[0]['index'], 'Banjir sudah 2 meter')
+    output_data = interpreter.get_tensor(output_details[0]['index'])
+    print(input_details)
+    print(output_data)
+    return 'success?'
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True) # This is just for testing in the Cloud Shell
