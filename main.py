@@ -149,13 +149,23 @@ def sort(method):
     elif method == 'support': #For sorting from the most supported complaint
         cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report ORDER BY support DESC")
         data = cursor.fetchall()
+    elif method == 'urgent':
+        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE urgent=1")
+        data = cursor.fetchall()
+    elif method == 'not-urgent':
+        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE urgent=0")
+        data = cursor.fetchall()
     result = listing(data,filter_sort_dict)
     return json.dumps(result, default=str)
 
 @app.route("/search/<keyword>")
 def search(keyword):
+    if keyword == 'urgent':
+        num = 1
+    elif keyword == 'not urgent':
+        num = 0
     cursor = cnx.cursor()
-    cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE id REGEXP '{}\*' OR title REGEXP '{}\*' OR category REGEXP '{}\*'".format(keyword,keyword,keyword))
+    cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE id REGEXP '{}\*' OR title REGEXP '{}\*' OR category REGEXP '{}\*' OR urgent={}".format(keyword,keyword,keyword,num))
     data = cursor.fetchall()
     result = listing(data,filter_sort_dict)
     return json.dumps(result, default=str)
@@ -239,7 +249,14 @@ def filter():
         elif ('start_date' and 'end_date') in request.args:
             query = query + ' AND ' + '(' + query_loc + ')'
         elif 'status_1' or ('start_date' and 'end_date') not in request.args:
-            query = query + query_loc         
+            query = query + query_loc
+    if 'urgency' in request.args:
+        urgency = request.args['urgency']
+        if query == "SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE ":
+            query = query + ' urgent={}'.format(str(urgency))
+        else:
+            query = ' AND urgent={}'.format(str(urgency))
+    print(query)         
     cursor = cnx.cursor()
     cursor.execute(query)
     data = cursor.fetchall()
