@@ -255,7 +255,7 @@ def filter():
         if query == "SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE ":
             query = query + ' urgent={}'.format(str(urgency))
         else:
-            query = ' AND urgent={}'.format(str(urgency))
+            query = query + ' AND urgent={}'.format(str(urgency))
     print(query)         
     cursor = cnx.cursor()
     cursor.execute(query)
