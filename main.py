@@ -89,20 +89,23 @@ def home():
                 <p>The parameters:\n</p>
                 <li>start_date & end_date (use both of them if you want to filter date)</li>
                 <li>status_1, status_2, ... , status_6</li>
-                <li>my_lat, my_longi, km_choice (use all of them if you want to filter location)</li><br><br>
+                <li>my_lat, my_longi, km_choice (use all of them if you want to filter location)</li>
+                <li>urgency(set 1 for urgent, set 2 for not urgent. Ex:urgency=0)</li><br><br>
                 <p> For sorting use <url>/sort/(method). For example:\n<p>
                 <li><a href="/sort/latest">https://deft-haven-312422.et.r.appspot.com/sort/latest</a></li>
                 <p>The (method)s:\n</p>
                 <li>latest (sorting from latest complaint)</li>
                 <li>oldest (sorting from oldest complaint)</li>
                 <li>comment (sorting from the most commented complaint)</li>
-                <li>support (sorting from the most supported complaint)</li><br><br>
+                <li>support (sorting from the most supported complaint)</li>
+                <li>urgent (getting the urgent complaint)</li>
+                <li>not-urgent (getting the not urgent complaint)</li><br><br>
                 <p> For search filtering use <url>/search/(keyword). For example:\n<p>
                 <li><a href="/search/pohon">https://deft-haven-312422.et.r.appspot.com/search/pohon</a></li>
-                <p>For now you can search by ID, title, and category</p><br><br>
+                <p>For now you can search by ID, title, category, and you can type in keyword 'urgent' for urgent complaint and 'not urgent' for not urgent complaint</p><br><br>
                 <p>For Viewing the complaint use /detail/(id). For Example:\n</p>
                 <li><a href="/detail/TS0000000001">https://deft-haven-312422.et.r.appspot.com/detail/TS0000000001</a></li><br><br>
-                <p>For inserting and updating data complaint use <url>/insert-data.\n</p>
+                <p>For inserting data complaint use <url>/insert-data.\n</p>
                 <li><a href="/insert-data">https://deft-haven-312422.et.r.appspot.com/insert-data</a></li>
                 <p>For inserting/updating support and status, there will be anouter route.\n</p><br><br>
                 <p>For getting all status report from a complaint use <url>/status/(id) For example:.\n</p>
