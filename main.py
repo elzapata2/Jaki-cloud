@@ -297,7 +297,17 @@ def detail(id):
     cursor = cnx.cursor()
     cursor.execute("SELECT * FROM report WHERE id='{}'".format(id))
     data = cursor.fetchall()
-    result = listing(data,view_all)
+    data_list = list(data[0])
+    if data_list[12] == 0:
+        data_list[12]= 'False'
+    else:
+        data_list[12] = 'True'
+    #print(data_list)
+    data_tup = tuple(data_list)
+    #print(data_tup)
+    data_real = []
+    data_real.append(data_tup)
+    result = listing(data_real,view_all)
     result_copy=result.copy()
     cursor.execute("SELECT status,created_at,who FROM history_report WHERE id_report='{}' ORDER BY created_at DESC LIMIT 1".format(id))
     data2 = cursor.fetchall()
