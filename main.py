@@ -17,6 +17,7 @@ app = Flask(__name__)
                                 auth_plugin='mysql_native_password')'''
 
 filter_sort_dict = {"id": '', "status": '', "title": '', "review_star": None, "longi": None, "lat": None, "created_at": '', "photo":''}
+pure_filter = {"id": '', "status": '', "title": '', "review_star": None, "longi": None, "lat": None, "created_at": '', "photo":'', "urgent":''}
 get_status_dict = {"id_report": '', "status": '', "who": '', "text": '', "created_at": '', "photo":''}
 view_all = {"id": '', "title": '', "created_at": '', "category":'', "longi": None, "lat": None, "support":None, "status": '', "review_text":'', "review_photo":'', "review_star":None, "photo":'', "urgent":''}
 status_view = {"status":'', "created_at":'', "who":''}
@@ -47,6 +48,11 @@ def listing (query_result,dict):
     return filter_sort_list
 
 def get_data_loc():
+    cnx = mysql.connector.connect(user='root',
+                                password='jaki1234',
+                                host='35.219.48.119',
+                                database='jaki',
+                                auth_plugin='mysql_native_password')
     cursor = cnx.cursor()
     cursor.execute("SELECT lat,longi FROM report")
     loc = cursor.fetchall()
@@ -146,24 +152,24 @@ def sort(method):
                                 auth_plugin='mysql_native_password')
     cursor = cnx.cursor()
     if method == 'latest': #For sorting from latest complaint
-        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report ORDER BY created_at DESC")
+        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo,urgent FROM report ORDER BY created_at DESC")
         data = cursor.fetchall()
     elif method == 'oldest': #For sorting from oldest complaint
-        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report ORDER BY created_at ASC")
+        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo,urgent FROM report ORDER BY created_at ASC")
         data = cursor.fetchall()
     elif method == 'comment': #For sorting from the most commented complaint
-        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report ORDER BY (SELECT COUNT(*) FROM discussion_report WHERE id_report=id) DESC")
+        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo,urgent FROM report ORDER BY (SELECT COUNT(*) FROM discussion_report WHERE id_report=id) DESC")
         data = cursor.fetchall()
     elif method == 'support': #For sorting from the most supported complaint
-        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report ORDER BY support DESC")
+        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo,urgent FROM report ORDER BY support DESC")
         data = cursor.fetchall()
     elif method == 'urgent':
-        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE urgent=1")
+        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo,urgent FROM report ORDER BY urgent DESC")
         data = cursor.fetchall()
     elif method == 'not-urgent':
-        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE urgent=0")
+        cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo,urgent FROM report ORDER BY urgent ASC")
         data = cursor.fetchall()
-    result = listing(data,filter_sort_dict)
+    result = listing(data,pure_filter)
     cnx.close()
     return json.dumps(result, default=str)
 
@@ -181,11 +187,12 @@ def search(keyword):
     else:
         num = 2
     cursor = cnx.cursor()
-    cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE id REGEXP '{}\*' OR title REGEXP '{}\*' OR category REGEXP '{}\*' OR urgent={}".format(keyword,keyword,keyword,num))
+    cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo,urgent FROM report WHERE id REGEXP '{}\*' OR title REGEXP '{}\*' OR category REGEXP '{}\*' OR urgent={}".format(keyword,keyword,keyword,num))
     data = cursor.fetchall()
-    result = listing(data,filter_sort_dict)
+    result = listing(data,pure_filter)
     cnx.close()
     return json.dumps(result, default=str)
+    #return 'check terminal'
 
 @app.route("/filter-loc/<my_longi>/<my_lat>/<km_choice>")
 def filter_loc(my_longi,my_lat,km_choice):
@@ -228,7 +235,7 @@ def filter():
                                 host='35.219.48.119',
                                 database='jaki',
                                 auth_plugin='mysql_native_password')    
-    query = "SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE "
+    query = "SELECT id,status,title,review_star,longi,lat,created_at,photo,urgent FROM report WHERE "
     if 'start_date' in request.args:
         start_date = request.args['start_date']
         if 'end_date' in request.args:
@@ -271,10 +278,10 @@ def filter():
         elif ('start_date' and 'end_date') in request.args:
             query = query + ' AND ' + '(' + query_loc + ')'
         elif 'status_1' or ('start_date' and 'end_date') not in request.args:
-            query = query + query_loc
+            query = query + '(' + query_loc + ')'
     if 'urgency' in request.args:
         urgency = request.args['urgency']
-        if query == "SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE ":
+        if query == "SELECT id,status,title,review_star,longi,lat,created_at,photo,urgent FROM report WHERE ":
             query = query + ' urgent={}'.format(str(urgency))
         else:
             query = query + ' AND urgent={}'.format(str(urgency))
@@ -282,7 +289,7 @@ def filter():
     cursor = cnx.cursor()
     cursor.execute(query)
     data = cursor.fetchall()
-    result = listing(data,filter_sort_dict)
+    result = listing(data,pure_filter)
     cnx.close()
     return json.dumps(result, default=str)
     #return query
@@ -297,17 +304,7 @@ def detail(id):
     cursor = cnx.cursor()
     cursor.execute("SELECT * FROM report WHERE id='{}'".format(id))
     data = cursor.fetchall()
-    data_list = list(data[0])
-    if data_list[12] == 0:
-        data_list[12]= 'False'
-    else:
-        data_list[12] = 'True'
-    #print(data_list)
-    data_tup = tuple(data_list)
-    #print(data_tup)
-    data_real = []
-    data_real.append(data_tup)
-    result = listing(data_real,view_all)
+    result = listing(data,view_all)
     result_copy=result.copy()
     cursor.execute("SELECT status,created_at,who FROM history_report WHERE id_report='{}' ORDER BY created_at DESC LIMIT 1".format(id))
     data2 = cursor.fetchall()
@@ -403,20 +400,9 @@ def insert_data():
         cnx.commit()
         cursor.execute("SELECT * FROM report ORDER BY created_at DESC LIMIT 1")
         data = cursor.fetchall()
-        data_list = list(data[0])
-        if data_list[12] == 0:
-            data_list[12]= 'False'
-        else:
-            data_list[12] = 'True'
-        #print(data_list)
-        data_tup = tuple(data_list)
-        #print(data_tup)
-        data_real = []
-        data_real.append(data_tup)
-        #print(data_real)
-        result = listing(data_real,view_all)
-        return json.dumps(result, default=str)
+        result = listing(data,view_all)
         cnx.close()
+        return json.dumps(result, default=str)
         #return rev_photo_url    
     return '''
               <form method="POST" enctype="multipart/form-data">
