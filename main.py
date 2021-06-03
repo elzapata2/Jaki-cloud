@@ -4,17 +4,17 @@ from flask import request
 import json
 import geopy.distance
 from google.cloud import storage
-import os
+#import os
 
 #os.environ["GOOGLE_APPLICATION_CREDENTIALS"]="cloudstorage.json"
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
 # called `app` in `main.py`.
 app = Flask(__name__)
-cnx = mysql.connector.connect(user='root',
+'''cnx = mysql.connector.connect(user='root',
                                 password='jaki1234',
                                 host='35.219.48.119',
                                 database='jaki',
-                                auth_plugin='mysql_native_password')
+                                auth_plugin='mysql_native_password')'''
 
 filter_sort_dict = {"id": '', "status": '', "title": '', "review_star": None, "longi": None, "lat": None, "created_at": '', "photo":''}
 get_status_dict = {"id_report": '', "status": '', "who": '', "text": '', "created_at": '', "photo":''}
@@ -139,6 +139,11 @@ def filter_status(status_1,status_2,status_3,status_4,status_5,status_6):
 
 @app.route("/sort/<method>")
 def sort(method):
+    cnx = mysql.connector.connect(user='root',
+                                password='jaki1234',
+                                host='35.219.48.119',
+                                database='jaki',
+                                auth_plugin='mysql_native_password')
     cursor = cnx.cursor()
     if method == 'latest': #For sorting from latest complaint
         cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report ORDER BY created_at DESC")
@@ -159,18 +164,27 @@ def sort(method):
         cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE urgent=0")
         data = cursor.fetchall()
     result = listing(data,filter_sort_dict)
+    cnx.close()
     return json.dumps(result, default=str)
 
 @app.route("/search/<keyword>")
 def search(keyword):
+    cnx = mysql.connector.connect(user='root',
+                                password='jaki1234',
+                                host='35.219.48.119',
+                                database='jaki',
+                                auth_plugin='mysql_native_password')
     if keyword == 'urgent':
         num = 1
     elif keyword == 'not urgent':
         num = 0
+    else:
+        num = 2
     cursor = cnx.cursor()
     cursor.execute("SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE id REGEXP '{}\*' OR title REGEXP '{}\*' OR category REGEXP '{}\*' OR urgent={}".format(keyword,keyword,keyword,num))
     data = cursor.fetchall()
     result = listing(data,filter_sort_dict)
+    cnx.close()
     return json.dumps(result, default=str)
 
 @app.route("/filter-loc/<my_longi>/<my_lat>/<km_choice>")
@@ -208,7 +222,12 @@ def filter_loc(my_longi,my_lat,km_choice):
     return json.dumps(result, default=str)
 
 @app.route("/filter")
-def filter():    
+def filter():
+    cnx = mysql.connector.connect(user='root',
+                                password='jaki1234',
+                                host='35.219.48.119',
+                                database='jaki',
+                                auth_plugin='mysql_native_password')    
     query = "SELECT id,status,title,review_star,longi,lat,created_at,photo FROM report WHERE "
     if 'start_date' in request.args:
         start_date = request.args['start_date']
@@ -264,11 +283,17 @@ def filter():
     cursor.execute(query)
     data = cursor.fetchall()
     result = listing(data,filter_sort_dict)
+    cnx.close()
     return json.dumps(result, default=str)
     #return query
 
 @app.route("/detail/<id>")
 def detail(id):
+    cnx = mysql.connector.connect(user='root',
+                                password='jaki1234',
+                                host='35.219.48.119',
+                                database='jaki',
+                                auth_plugin='mysql_native_password')
     cursor = cnx.cursor()
     cursor.execute("SELECT * FROM report WHERE id='{}'".format(id))
     data = cursor.fetchall()
@@ -314,10 +339,16 @@ def detail(id):
     complete_list = []
     complete_list.append(d)
     #print (complete_list)
+    cnx.close()
     return json.dumps(complete_list, default=str)
 
 @app.route("/insert-data",methods=['GET', 'POST'])
 def insert_data():
+    cnx = mysql.connector.connect(user='root',
+                                password='jaki1234',
+                                host='35.219.48.119',
+                                database='jaki',
+                                auth_plugin='mysql_native_password')
     if request.method == 'POST':
         title=request.form.get('title')
         if title == '':
@@ -375,6 +406,7 @@ def insert_data():
         #print(data_real)
         result = listing(data_real,view_all)
         return json.dumps(result, default=str)
+        cnx.close()
         #return rev_photo_url    
     return '''
               <form method="POST" enctype="multipart/form-data">
@@ -419,22 +451,39 @@ def predict(x):
 
 @app.route("/status/<id>")
 def status(id):
+    cnx = mysql.connector.connect(user='root',
+                                password='jaki1234',
+                                host='35.219.48.119',
+                                database='jaki',
+                                auth_plugin='mysql_native_password')
     cursor = cnx.cursor()
     cursor.execute("SELECT * FROM history_report WHERE id_report='{}'".format(id))
     data = cursor.fetchall()
     result = listing(data,get_status_dict)
+    cnx.close()
     return json.dumps(result, default=str)
 
 @app.route("/get-comment/<id>")
 def get_comment(id):
+    cnx = mysql.connector.connect(user='root',
+                                password='jaki1234',
+                                host='35.219.48.119',
+                                database='jaki',
+                                auth_plugin='mysql_native_password')
     cursor = cnx.cursor()
     cursor.execute("SELECT username,discuss,created_at FROM discussion_report WHERE id_report='{}'".format(id))
     data = cursor.fetchall()
     result = listing(data,disc_dict)
+    cnx.close()
     return json.dumps(result, default=str)
 
 @app.route("/insert-comment",methods=['GET', 'POST'])
 def insert_comment():
+    cnx = mysql.connector.connect(user='root',
+                                password='jaki1234',
+                                host='35.219.48.119',
+                                database='jaki',
+                                auth_plugin='mysql_native_password')
     if request.method == 'POST':
         id=request.form.get('id')
         user=request.form.get('user')
@@ -445,6 +494,7 @@ def insert_comment():
         cursor.execute("SELECT * FROM discussion_report ORDER BY created_at DESC LIMIT 1")
         data = cursor.fetchall()
         result = listing(data,inserted_comment)
+        cnx.close()
         return json.dumps(result, default=str)    
     return '''
               <form method="POST">
@@ -456,6 +506,11 @@ def insert_comment():
 
 @app.route("/add-dec-support",methods=['GET', 'POST'])
 def add_dec_support():
+    cnx = mysql.connector.connect(user='root',
+                                password='jaki1234',
+                                host='35.219.48.119',
+                                database='jaki',
+                                auth_plugin='mysql_native_password')
     if request.method == 'POST':
         if request.form["action"] == 'Add':
             id=request.form.get('id')
@@ -468,6 +523,7 @@ def add_dec_support():
             cursor = cnx.cursor()
             cursor.execute("UPDATE report SET support=IF(support=1,support=NULL,support - 1) WHERE id='{}'".format(id))
             cnx.commit()
+            cnx.close()
             return 'Support successfully decreased'     
     return '''
               <form method="POST">
@@ -478,6 +534,11 @@ def add_dec_support():
 
 @app.route("/insert-status",methods=['GET', 'POST'])
 def insert_status():
+    cnx = mysql.connector.connect(user='root',
+                                password='jaki1234',
+                                host='35.219.48.119',
+                                database='jaki',
+                                auth_plugin='mysql_native_password')
     if request.method == 'POST':
         id=request.form.get('id')
         status=request.form.get('status')
@@ -500,6 +561,7 @@ def insert_status():
         cursor.execute("SELECT * FROM history_report ORDER BY created_at DESC LIMIT 1")
         data = cursor.fetchall()
         result = listing(data,inserted_status)
+        cnx.close()
         return json.dumps(result, default=str)  
         #print (photo_url)
         #return photo_url     
